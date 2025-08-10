@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Bangers&display=swap" rel="stylesheet">
+  <style>
+    body { margin:0; font-family:'Luckiest Guy',cursive; background:url('images/cutepet.jpg') no-repeat center center fixed; background-size:cover; display:flex; justify-content:center; align-items:center; min-height:100vh; color:#333; }
+    .form-box { background:rgba(255,240,243,0.92); padding:40px; border-radius:20px; box-shadow:0 6px 16px rgba(0,0,0,0.1); text-align:center; animation:pop .8s ease; width:320px; max-width:92vw; }
+    .form-box h2{ margin-top:0; }
+    .form-box input{ padding:12px; margin:10px 0; width:100%; border:2px solid #ffc2d1; border-radius:12px; font-size:1rem; }
+    .form-box button{ margin-top:15px; width:100%; padding:12px; font-size:1.1rem; background:#ffb703; color:#fff; border:none; border-radius:12px; cursor:pointer; font-family:'Bangers',cursive; }
+    .form-box button:hover{ background:#fb8500; }
+    @keyframes pop{ from{ transform:scale(.9); opacity:0; } to{ transform:scale(1); opacity:1; } }
+    .helper{ font-size:.95rem; margin-top:10px; }
+    .helper a{ color:#ff3e83; text-decoration:none; border-bottom:2px solid #ffc2d1; }
+    .helper a:hover{ opacity:.9; }
+    .error { margin-top:10px; color:#c00; font-size:.95rem; }
+    .ok { margin-top:10px; color:#0a0; font-size:.95rem; }
+  </style>
+</head>
+<body>
+  <div class="form-box">
+    <h2>🔑 Login</h2>
+    <form id="loginForm" novalidate>
+      <input id="email" type="email" placeholder="Email" required />
+      <input id="password" type="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+      <div id="msg" class=""></div>
+    </form>
+    <p class="helper">Don't have an account? <a href="signup.html">Sign Up</a></p>
+  </div>
+
+<script>
+(function(){
+  const API_BASE = 'http://127.0.0.1:4000';
+  const form = document.getElementById('loginForm');
+  const emailEl = document.getElementById('email');
+  const passEl  = document.getElementById('password');
+  const msgEl   = document.getElementById('msg');
+
+  function showMsg(txt, ok=false){
+    msgEl.textContent = txt;
+    msgEl.className = ok ? 'ok' : 'error';
+  }
+
+  function saveToken(token){
+    try{
+      localStorage.setItem('token', token);
+    }catch(_){}
+  }
+  function bearer(){
+    const raw = localStorage.getItem('token');
+    return raw ? (raw.startsWith('Bearer ')? raw : 'Bearer ' + raw) : null;
+  }
+
+  async function login(email, password){
+    const r = await fetch(API_BASE + '/api/auth/login', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password })
+    });
+    const txt = await r.text();
+    let data = null; try{ data = txt ? JSON.parse(txt) : null; }catch(_){}
+    return { ok: r.ok, status: r.status, data, raw: txt };
+  }
+
+  async function getMe(){
+    const t = bearer(); if(!t) throw new Error('no token');
+    const r = await fetch(API_BASE + '/api/auth/me', { headers:{ 'Authorization': t }});
+    const txt = await r.text(); let data=null; try{ data = txt? JSON.parse(txt):null }catch(_){}
+    return { ok: r.ok, status:r.status, data, raw: txt };
+  }
+
+  async function getLatest(){
+    const t = bearer(); if(!t) throw new Error('no token');
+    const r = await fetch(API_BASE + '/api/me/latest', { headers:{ 'Authorization': t }});
+    const txt = await r.text(); let data=null; try{ data = txt? JSON.parse(txt):null }catch(_){}
+    return { ok: r.ok, status:r.status, data, raw: txt };
+  }
+
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const email = (emailEl.value||'').trim().toLowerCase();
+    const password = (passEl.value||'').trim();
+
+    if(!email || !password){
+      showMsg('Please enter email and password'); return;
+    }
+
+    showMsg('Logging in...', true);
+    try{
+      // 1) Login
+      const L = await login(email, password);
+      console.log('Login resp:', L.status, L.data || L.raw);
+      if(!L.ok){
+        if(L.status === 401){
+          showMsg('Invalid email or password. Try Sign Up if you are new.');
+        }else{
+          showMsg('Login failed ('+L.status+'): ' + (L.data?.detail || L.raw || ''));
+        }
+        return;
+      }
+      if(!L.data?.token){ showMsg('No token returned from server'); return; }
+      saveToken(L.data.token);
+
+      // 2) /me (اختياري لتخزين الاسم)
+      try{
+        const M = await getMe();
+        console.log('Me resp:', M.status, M.data || M.raw);
+        if(M.ok){
+          localStorage.setItem('user_name', M.data?.name || M.data?.email || 'User');
+        }
+      }catch(err){ console.warn('me failed', err); }
+
+      // 3) /me/latest (إعادة ملء آخر تقييم/خطة)
+      try{
+        const LT = await getLatest();
+        console.log('Latest resp:', LT.status, LT.data || LT.raw);
+        if(LT.ok && LT.data){
+          if(LT.data.evaluation)
+            localStorage.setItem('lastEvaluation', JSON.stringify(LT.data.evaluation));
+          if(LT.data.plan)
+            localStorage.setItem('lastPlan', JSON.stringify({ planId: LT.data.plan.id, items: LT.data.plan.items, advice: LT.data.plan.advice || [] }));
+        }
+      }catch(err){ console.warn('latest failed', err); }
+
+      showMsg('✅ Login successful', true);
+      location.replace('assess.html');
+    }catch(err){
+      console.error(err);
+      showMsg('Network error: ' + (err.message || err));
+    }
+  });
+
+  // نصيحة: امسح مفاتيح قديمة ممكن تعمّل لخبطة
+  try{
+    ['lastEvaluation','lastPlan','domainScores','fullDomainScores','Signals'].forEach(k=>localStorage.removeItem(k));
+  }catch(_){}
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+
+body.cartoon-bg {
+  margin: 0;
+  font-family: 'Fredoka', cursive;
+  background: url('../assets/bg-cartoon.jpg') no-repeat center center fixed;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: #333;
+}
+
+.landing-box, .form-box {
+  text-align: center;
+  background: rgba(255, 240, 243, 0.92);
+  padding: 60px;
+  border-radius: 25px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  animation: pop 0.8s ease;
+}
+
+h1 {
+  font-size: 2.8rem;
+  margin-bottom: 20px;
+  color: #ff6f61;
+}
+
+p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+}
+
+.cartoon-btn {
+  padding: 14px 28px;
+  font-size: 1.1rem;
+  background: #ffb703;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.cartoon-btn:hover {
+  background: #fb8500;
+  transform: scale(1.05);
+}
+
+.form-box input {
+  padding: 12px;
+  margin: 10px 0;
+  width: 100%;
+  border: 2px solid #ffc2d1;
+  border-radius: 12px;
+  font-size: 1rem;
+}
+
+.form-box button {
+  margin-top: 15px;
+  width: 100%;
+}
+
+@keyframes pop {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

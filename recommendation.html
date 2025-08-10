@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Your Study Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Chewy&display=swap" rel="stylesheet">
+<style>
+  body{background:#fff7fb;font-family:'Chewy',cursive;margin:0;color:#333}
+  .container{max-width:1000px;margin:24px auto;padding:24px}
+  h1{color:#b3006b;text-align:center;margin:0 0 20px}
+  .card{background:#fff;border:3px dashed #cc2d8f;border-radius:20px;padding:18px;box-shadow:5px 5px 15px rgba(0,0,0,.06);margin-bottom:18px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .item{border:2px solid #f7b1d6;border-radius:14px;padding:10px;margin:8px 0}
+  .domain{font-weight:700;color:#cc2d8f}
+  .btn{background:#cc2d8f;color:#fff;border:none;border-radius:12px;padding:10px 16px;cursor:pointer;font-size:1rem}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .muted{opacity:.7}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📚 Your Plan</h1>
+
+  <div class="card">
+    <h2>Tasks</h2>
+    <div id="tasks"></div>
+    <div style="margin-top:12px;display:flex;gap:10px">
+      <button class="btn" id="startBtn">Start Plan</button>
+      <button class="btn muted" id="backBtn">← Back to Results</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Videos</h3>
+      <ul id="videos"></ul>
+    </div>
+    <div class="card">
+      <h3>Books & Links</h3>
+      <ul id="links"></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'http://127.0.0.1:4000';
+  function getToken(){const raw=localStorage.getItem('token');return raw? (raw.startsWith('Bearer ')?raw:'Bearer '+raw):null}
+  async function api(path, {method='GET', body}={}){
+    const t=getToken(); if(!t){alert('Please login first'); location.href='login.html'; throw new Error('no token')}
+    const r = await fetch(API_BASE+path, {
+      method, headers:{'Authorization':t, ...(body?{'Content-Type':'application/json'}:{})},
+      body: body?JSON.stringify(body):undefined
+    });
+    const txt=await r.text(); let data=null; try{data=txt?JSON.parse(txt):null}catch(_){}
+    if(!r.ok) throw new Error(data?.detail || txt || r.status);
+    return data;
+  }
+
+  function groupByWeek(items){
+    const g={}; (items||[]).forEach(it=>{ const w=it.week||1; (g[w]=g[w]||[]).push(it); }); return g;
+  }
+
+  function renderTasks(items){
+    const wrap=document.getElementById('tasks'); wrap.innerHTML='';
+    if(!items?.length){ wrap.innerHTML='<p>No tasks yet.</p>'; return; }
+    const byWeek = groupByWeek(items);
+    Object.keys(byWeek).sort((a,b)=>a-b).forEach(w=>{
+      const h = document.createElement('h4'); h.textContent = 'Week ' + w; wrap.appendChild(h);
+      byWeek[w].forEach(it=>{
+        const div=document.createElement('div'); div.className='item';
+        const left = it.domain ? (it.domain) : (it.course ? ('Course: '+it.course) : (it.type==='action'?'Habit':'General'));
+        const title = it.title || '';
+        let meta = [];
+        if (it.resType) meta.push(it.resType);
+        if (it.provider) meta.push(it.provider);
+        if (it.est) meta.push(it.est);
+        div.innerHTML = `
+          <div class="domain">${left}</div>
+          <div>
+            ${it.url ? `<a href="${it.url}" target="_blank" rel="noreferrer noopener">${title}</a>` : title}
+            ${meta.length? ` <span class="muted">(${meta.join(' • ')})</span>`: ''}
+          </div>`;
+        wrap.appendChild(div);
+      });
+    });
+  }
+
+  function renderResources(items){
+    const v=document.getElementById('videos'); v.innerHTML='';
+    const l=document.getElementById('links');  l.innerHTML='';
+    const resources = (items||[]).filter(x=>x.type==='resource');
+    resources.forEach(r=>{
+      const text = `${r.title}${r.provider? ' – '+r.provider:''}${r.est? ' ('+r.est+')':''}`;
+      const li = document.createElement('li');
+      const isVid = ['video','playlist','course'].includes((r.resType||'').toLowerCase());
+      li.innerHTML = r.url ? `<a href="${r.url}" target="_blank">${text}</a>` : text;
+      (isVid ? v : l).appendChild(li);
+    });
+  }
+
+  function renderAdvice(list){
+    let adviceBox = document.getElementById('adviceBox');
+    if(!adviceBox){
+      const card = document.createElement('div'); card.className='card';
+      const h3 = document.createElement('h3'); h3.textContent='Advice';
+      adviceBox = document.createElement('ul'); adviceBox.id='adviceBox';
+      card.appendChild(h3); card.appendChild(adviceBox);
+      document.querySelector('.container').appendChild(card);
+    }
+    adviceBox.innerHTML = '';
+    (list||[]).forEach(s=>{
+      const li=document.createElement('li'); li.textContent=s; adviceBox.appendChild(li);
+    });
+  }
+
+  async function loadPlan(){
+    let plan = null, advice = null;
+    const lastPlanRaw = localStorage.getItem('lastPlan');
+    if(lastPlanRaw){ try{ const tmp = JSON.parse(lastPlanRaw); plan = tmp; advice = tmp.advice || null; }catch(_){} }
+
+    if(plan?.planId){
+      try{
+        const p = await api('/api/plans/'+plan.planId);
+        plan = { planId: p.id, items: p.items }; advice = p.advice || null;
+      }catch(_){ plan = null; }
+    }
+
+    if(!plan){
+      const p = await api('/api/plans/latest');
+      plan = { planId: p.id, items: p.items }; advice = p.advice || null;
+      localStorage.setItem('lastPlan', JSON.stringify(plan));
+    }
+
+    renderTasks(plan.items||[]);
+    renderResources(plan.items||[]);
+    renderAdvice(advice||[]);
+
+    document.getElementById('startBtn').onclick = async ()=>{
+      try{
+        await api('/api/plans/'+plan.planId+'/start', {method:'POST'});
+        alert('✅ Plan started!');
+      }catch(err){ alert(err.message||err); }
+    };
+  }
+
+  document.getElementById('backBtn').addEventListener('click', ()=>{ location.href='results.html'; });
+  loadPlan().catch(err=>alert(err.message||err));
+</script>
+</body>
+</html>

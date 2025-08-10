@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sign Up</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Bangers&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Luckiest Guy', cursive;
+      background: url('images/cutepet.jpg') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .form-box {
+      background: rgba(255, 240, 243, 0.92);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      text-align: center;
+      animation: pop 0.8s ease;
+    }
+
+    .form-box input {
+      padding: 12px;
+      margin: 10px 0;
+      width: 100%;
+      border: 2px solid #ffc2d1;
+      border-radius: 12px;
+      font-size: 1rem;
+    }
+
+    .form-box button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      font-size: 1.1rem;
+      background-color: #ffb703;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: 'Bangers', cursive;
+    }
+
+    .form-box button:hover {
+      background-color: #fb8500;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-box">
+    <h2>🧸 Sign Up</h2>
+    <form>
+      <input type="text" placeholder="Full Name" required />
+      <input type="email" placeholder="Email" required />
+      <input type="password" placeholder="Password" required />
+      <input type="password" placeholder="Confirm Password" required />
+      <button type="submit">Create Account</button>
+    </form>
+
+   
+    <script>
+      document.querySelector("form").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const password = document.querySelector('input[placeholder="Password"]').value;
+        const confirmPassword = document.querySelector('input[placeholder="Confirm Password"]').value;
+
+        if (password !== confirmPassword) {
+          alert("Passwords do not match!");
+          return;
+        }
+
+        alert("Account created successfully!");
+        window.location.href = "login.html";
+      });
+    </script>
+
+    <p>Already have an account? <a href="login.html">Login</a></p>
+  </div>
+
+ 
+  <script>
+  (function(){
+    if (window.__signupWiredV2) return; window.__signupWiredV2 = true;
+    const form = document.querySelector('form');
+    if (!form) return;
+
+    form.addEventListener('submit', async function onSignup(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+
+      const fullNameEl = document.querySelector('input[placeholder="Full Name"]');
+      const emailEl = document.querySelector('input[type="email"]');
+      const passEl = document.querySelector('input[placeholder="Password"]');
+      const pass2El = document.querySelector('input[placeholder="Confirm Password"]');
+
+      const fullName = (fullNameEl || {}).value?.trim() || null;
+      const email = (emailEl || {}).value?.trim() || '';
+      const password = (passEl || {}).value?.trim() || '';
+      const confirmPassword = (pass2El || {}).value?.trim() || '';
+
+      if (!email || !password) { alert('Email and password are required'); (emailEl||{}).focus?.(); return; }
+      if (password !== confirmPassword) { alert('Passwords do not match!'); (pass2El||{}).focus?.(); return; }
+
+      
+      const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+      if (!emailPattern.test(email)) {
+        alert('Please enter a valid email like name@example.com');
+        (emailEl||{}).focus?.();
+        return;
+      }
+
+      try{
+        const res = await fetch('http://127.0.0.1:4000/api/auth/signup', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ name: fullName, email, password }),
+          mode: 'cors'
+        });
+        const data = await res.json().catch(()=> ({}));
+        console.log('Signup response:', res.status, data);
+
+        if(res.ok){
+          alert('✅ Account created! Please login.');
+          location.href='login.html';
+        }else{
+          
+          if (res.status === 409) {
+            alert('This email is already registered. Try logging in.');
+          } else {
+            const msg = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail);
+            alert('❌ Signup failed: ' + (msg || res.status));
+          }
+        }
+      }catch(err){
+        alert('❌ Network error: ' + err.message);
+      }
+    }, { capture:true });
+  })();
+  </script>
+
+</body>
+</html>

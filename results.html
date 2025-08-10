@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Your Results</title>
+<link href="https://fonts.googleapis.com/css2?family=Chewy&display=swap" rel="stylesheet">
+<style>
+  body{background:#ffeeF5;font-family:'Chewy',cursive;margin:0;color:#333}
+  .container{max-width:1000px;margin:24px auto;padding:24px}
+  .card{background:#fff;border:3px dashed #ff69b4;border-radius:20px;padding:18px;box-shadow:5px 5px 15px rgba(0,0,0,.06);margin-bottom:18px}
+  h1{color:#ff4c87;text-align:center;margin:0 0 20px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .pill{display:inline-block;background:#ffeaf3;color:#ff3e83;border:2px solid #ff69b4;border-radius:999px;padding:4px 10px;margin:4px 6px 0 0}
+  .btn{background:#ff69b4;color:#fff;border:none;border-radius:12px;padding:10px 16px;cursor:pointer;font-size:1rem}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .scores{min-height:220px;border:3px solid #ff69b4;border-radius:16px;padding:12px}
+  .score-row{display:flex;justify-content:space-between;border-bottom:1px dashed #ffd1e1;padding:8px 0}
+  .score-row:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🎉 Your Results</h1>
+
+  <div class="card">
+    <h2>Domain Scores</h2>
+    <div id="scoresBox" class="scores"></div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h3>💪 Strengths</h3>
+      <div id="strengths"></div>
+    </div>
+    <div class="card">
+      <h3>🍀 Improvement Areas</h3>
+      <div id="improvements"></div>
+    </div>
+  </div>
+
+  <div class="card" style="text-align:center">
+    <button class="btn" id="toPlanBtn">Build Study Plan →</button>
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'http://127.0.0.1:4000';
+  function getToken(){const raw=localStorage.getItem('token');return raw? (raw.startsWith('Bearer ')?raw:'Bearer '+raw):null}
+  async function api(path, {method='GET', body}={}){
+    const t=getToken(); if(!t){alert('Please login first'); location.href='login.html'; throw new Error('no token')}
+    const r = await fetch(API_BASE+path, {
+      method, headers:{'Authorization':t, ...(body?{'Content-Type':'application/json'}:{})},
+      body: body?JSON.stringify(body):undefined
+    });
+    const txt=await r.text(); let data=null; try{data=txt?JSON.parse(txt):null}catch(_){}
+    if(!r.ok) throw new Error(data?.detail || txt || r.status);
+    return data;
+  }
+
+  function renderScores(ds){
+    const box=document.getElementById('scoresBox'); box.innerHTML='';
+    const keys=Object.keys(ds||{});
+    if(!keys.length){ box.innerHTML='<p>No scores found.</p>'; return; }
+    keys.forEach(k=>{
+      const row=document.createElement('div'); row.className='score-row';
+      row.innerHTML=`<span>${k}</span><b>${ds[k]}</b>`;
+      box.appendChild(row);
+    });
+  }
+  function splitStrengths(ds){
+    const strengths=[], improve=[];
+    Object.entries(ds||{}).forEach(([k,v])=>{
+      if(v>=80) strengths.push(k);
+      else if(v<60) improve.push(k);
+    });
+    return {strengths, improve};
+  }
+  function renderPills(id, arr){
+    const el=document.getElementById(id); el.innerHTML='';
+    if(!arr.length){ el.innerHTML='<span class="pill">—</span>'; return;}
+    arr.forEach(x=>{ const s=document.createElement('span'); s.className='pill'; s.textContent=x; el.appendChild(s); });
+  }
+
+  async function loadEvaluation(){
+    
+    let evalObj=null;
+    const lastEvalRaw = localStorage.getItem('lastEvaluation');
+    if(lastEvalRaw){ try{ evalObj = JSON.parse(lastEvalRaw); }catch(_){} }
+    
+    if(!evalObj || !evalObj.domainScores){
+      evalObj = await api('/api/evaluate/latest');
+      localStorage.setItem('lastEvaluation', JSON.stringify(evalObj));
+    }
+    renderScores(evalObj.domainScores||{});
+    const {strengths, improve} = splitStrengths(evalObj.domainScores||{});
+    renderPills('strengths', strengths);
+    renderPills('improvements', improve);
+    return evalObj;
+  }
+
+  document.getElementById('toPlanBtn').addEventListener('click', async ()=>{
+    try{
+      const e = await loadEvaluation();
+      
+      const plan = await api('/api/plans/', {method:'POST', body:{evaluationId: e.id || e.evaluationId}});
+      localStorage.setItem('lastPlan', JSON.stringify(plan));
+      location.href='recommendation.html';
+    }catch(err){
+      alert(err.message||err);
+    }
+  });
+
+  loadEvaluation().catch(err=>alert(err.message||err));
+</script>
+</body>
+</html>

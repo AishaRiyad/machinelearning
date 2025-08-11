@@ -1,0 +1,292 @@
+meta:
+  version: 1
+  name: skill-eval-rules
+  description: Rule-based evaluation to generate a weekly learning plan from assessment scores, soft skills, signals, and course grades.
+
+thresholds:
+  prog:              { intermediate: 60, advanced: 85 }
+  algo:              { intermediate: 60, advanced: 85 }
+  systems:           { intermediate: 60, advanced: 85 }
+  hardware:          { intermediate: 60, advanced: 85 }
+  web:               { intermediate: 60, advanced: 85 }
+  ai:                { intermediate: 60, advanced: 85 }
+  database:          { intermediate: 60, advanced: 85 }
+  problem_solving:   { intermediate: 60, advanced: 85 }
+  english:           { intermediate: 60, advanced: 85 }
+  communication:     { intermediate: 60, advanced: 85 }
+  teamwork:          { intermediate: 60, advanced: 85 }
+  overall:           { intermediate: 65, advanced: 85 }
+
+weights:
+  prog: 1
+  algo: 1
+  systems: 1
+  hardware: 1
+  web: 1
+  ai: 1
+  database: 1
+  problem_solving: 1
+  english: 0.5
+  communication: 0.5
+  teamwork: 0.5
+
+level_bands:
+  default:
+    beginner: [0, 59]
+    intermediate: [60, 84]
+    advanced: [85, 100]
+
+recommendations:
+  - if:
+      any:
+        - { domain: "prog", lt: 60 }
+        - { domain: "algo", lt: 60 }
+    then: "Run a foundations sprint: 30–45 minutes of daily drills for 10 days."
+  - if: { domain: "systems", lt: 60 }
+    then: "Do a weekend mini-project: REST CRUD + database + simple pagination."
+  - if: { domain: "hardware", lt: 60 }
+    then: "Practice pipeline/hazard worksheets and explain each fix aloud."
+  - if:
+      all:
+        - { domain: "problem_solving", lt: 60 }
+        - { domain: "algo", gte: 60 }
+    then: "Schedule two challenge sessions per week and write solution notes."
+  - if: { domain: "english", lt: 60 }
+    then: "Do daily listening and reading, then write a 100-word summary."
+  - if: { domain: "communication", lt: 60 }
+    then: "Use the SBI model (Situation–Behavior–Impact) in your next feedback."
+  - if: { domain: "teamwork", lt: 60 }
+    then: "Try pair-programming weekly and rotate roles."
+  - if: { domain: "prog", gte: 60, lt: 85 }
+    then: "Refactor a small project; add tests and continuous integration."
+  - if: { domain: "systems", gte: 85 }
+    then: "Profile an API under load; document bottlenecks and implement caching."
+
+resources:
+  domains:
+    prog:
+      beginner:
+        - { title: "Python for Beginners – Full Course", type: "video", url: "https://www.youtube.com/watch?v=_uQrJ0TkZlc", provider: "freeCodeCamp", est: "4–6h" }
+        - { title: "Object-Oriented Programming in Python", type: "video", url: "https://www.youtube.com/watch?v=Ej_02ICOIgs", provider: "Corey Schafer", est: "1–2h" }
+        - { title: "100 Python Exercises", type: "practice", url: "https://www.w3resource.com/python-exercises/", provider: "w3resource", est: "multi-day" }
+      intermediate:
+        - { title: "Real Python – Projects & Tutorials", type: "site", url: "https://realpython.com/", provider: "Real Python", est: "3–5h" }
+        - { title: "pytest Crash Course", type: "video", url: "https://www.youtube.com/watch?v=etosV2IWBF0", provider: "ArjanCodes", est: "1–2h" }
+        - { title: "Requests + APIs Mini-Projects", type: "article", url: "https://requests.readthedocs.io/en/latest/user/quickstart/", provider: "Requests Docs", est: "2–3h" }
+      advanced:
+        - { title: "Good First Issues (Open-Source)", type: "site", url: "https://goodfirstissue.dev/", provider: "OSS", est: "multi-day" }
+        - { title: "Effective Python (Best Practices)", type: "article", url: "https://docs.python-guide.org/writing/style/", provider: "Hitchhiker’s Guide", est: "1–2h" }
+
+    algo:
+      beginner:
+        - { title: "Big-O & Data Structures Crash Course", type: "video", url: "https://www.youtube.com/watch?v=6Iq5iMCVsXA", provider: "CS Dojo", est: "1–2h" }
+        - { title: "Arrays/Hash/Stack Drills", type: "practice", url: "https://leetcode.com/problemset/", provider: "LeetCode", est: "10–15 problems" }
+      intermediate:
+        - { title: "NeetCode Roadmap (BFS/DFS/Patterns)", type: "site", url: "https://neetcode.io/roadmap", provider: "NeetCode", est: "4–6h" }
+        - { title: "Trees & Heaps", type: "practice", url: "https://www.hackerrank.com/domains/data-structures", provider: "HackerRank", est: "8–12 problems" }
+      advanced:
+        - { title: "Dijkstra / A* Implementation", type: "article", url: "https://cp-algorithms.com/graph/dijkstra.html", provider: "CP-Algorithms", est: "2–4h" }
+        - { title: "Graph Patterns (Shortest Paths)", type: "video", url: "https://www.youtube.com/watch?v=GazC3A4OQTE", provider: "William Fiset", est: "1–2h" }
+
+    systems:
+      beginner:
+        - { title: "SQL Basics (SELECT/WHERE/JOIN)", type: "course", url: "https://www.khanacademy.org/computing/computer-programming/sql", provider: "Khan Academy", est: "3–5h" }
+        - { title: "OS Basics: Scheduling & Deadlocks", type: "playlist", url: "https://www.youtube.com/playlist?list=PL9PzDKDGTZ7m7xG2lLBVmOAX-HJ1i8LJI", provider: "GATE Smashers", est: "4–6h" }
+      intermediate:
+        - { title: "Build REST API with FastAPI + DB", type: "video", url: "https://www.youtube.com/watch?v=7t2alSnE2-I", provider: "freeCodeCamp", est: "3–4h" }
+        - { title: "Database Indexing Basics", type: "article", url: "https://use-the-index-luke.com/", provider: "Use The Index, Luke!", est: "2–3h" }
+      advanced:
+        - { title: "Profiling & Performance for Python", type: "site", url: "https://pythonspeed.com/", provider: "PythonSpeed", est: "2–3h" }
+        - { title: "Async I/O & Concurrency (FastAPI)", type: "article", url: "https://fastapi.tiangolo.com/async/", provider: "FastAPI Docs", est: "1–2h" }
+
+    hardware:
+      beginner:
+        - { title: "CPU Pipeline Basics", type: "video", url: "https://www.youtube.com/watch?v=O5nskjZ_GoI", provider: "Computerphile", est: "30–45m" }
+        - { title: "Caches: L1/L2/RAM", type: "article", url: "https://danluu.com/fast/", provider: "Dan Luu", est: "30–60m" }
+      intermediate:
+        - { title: "Pipeline Hazards + NOP Drills", type: "practice", url: "https://www.cs.cornell.edu/courses/cs3410/2019sp/", provider: "CS3410 Materials", est: "1–2h" }
+        - { title: "Memory Hierarchy Exercises", type: "article", url: "https://pages.cs.wisc.edu/~remzi/OSTEP/", provider: "OSTEP", est: "1–2h" }
+      advanced:
+        - { title: "Out-of-Order/Superscalar Overview", type: "article", url: "https://en.wikipedia.org/wiki/Out-of-order_execution", provider: "Wikipedia", est: "1–2h" }
+        - { title: "Branch Prediction Primer", type: "article", url: "https://danluu.com/branch-prediction/", provider: "Dan Luu", est: "45–60m" }
+
+    web:
+      beginner:
+        - { title: "HTTP Crash Course", type: "video", url: "https://www.youtube.com/watch?v=iYM2zFP3Zn0", provider: "Traversy Media", est: "1h" }
+        - { title: "MDN Fetch Guide", type: "article", url: "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch", provider: "MDN", est: "45–90m" }
+      intermediate:
+        - { title: "HTTP Status Codes", type: "article", url: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status", provider: "MDN", est: "1–2h" }
+        - { title: "REST Patterns", type: "article", url: "https://restfulapi.net/", provider: "restfulapi.net", est: "1–2h" }
+      advanced:
+        - { title: "Caching and ETags", type: "article", url: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching", provider: "MDN", est: "1–2h" }
+        - { title: "Performance Basics", type: "site", url: "https://web.dev/fast/", provider: "web.dev", est: "multi-day" }
+
+    ai:
+      beginner:
+        - { title: "Neural Networks Crash Course", type: "video", url: "https://www.youtube.com/watch?v=aircAruvnKk", provider: "3Blue1Brown", est: "1–2h" }
+        - { title: "Activation Functions Overview", type: "article", url: "https://ml-cheatsheet.readthedocs.io/en/latest/activation_functions.html", provider: "ML Cheatsheet", est: "30–45m" }
+      intermediate:
+        - { title: "Training, Validation, Test", type: "article", url: "https://developers.google.com/machine-learning/crash-course/validation", provider: "Google MLCC", est: "45–90m" }
+        - { title: "Regularization (L2/Dropout)", type: "video", url: "https://www.youtube.com/watch?v=ARq74QuavAo", provider: "StatQuest", est: "1h" }
+      advanced:
+        - { title: "Optimization & LR Schedules", type: "article", url: "https://pytorch.org/docs/stable/optim.html", provider: "PyTorch Docs", est: "1–2h" }
+        - { title: "CNN/RNN Overview", type: "article", url: "https://cs231n.github.io/", provider: "CS231n Notes", est: "multi-day" }
+
+    database:
+      beginner:
+        - { title: "SQL Basics", type: "course", url: "https://www.khanacademy.org/computing/computer-programming/sql", provider: "Khan Academy", est: "3–5h" }
+        - { title: "WHERE vs HAVING", type: "article", url: "https://use-the-index-luke.com/sql/where-clause", provider: "Use The Index, Luke!", est: "45–90m" }
+      intermediate:
+        - { title: "Indexes and Query Plans", type: "article", url: "https://use-the-index-luke.com/", provider: "Use The Index, Luke!", est: "2–3h" }
+        - { title: "SQL Practice Set", type: "practice", url: "https://www.hackerrank.com/domains/sql", provider: "HackerRank", est: "8–12 problems" }
+      advanced:
+        - { title: "Transactions & Isolation", type: "article", url: "https://martin.kleppmann.com/", provider: "Kleppmann Posts", est: "1–2h" }
+        - { title: "Normalization vs Denormalization", type: "article", url: "https://www.vertabelo.com/blog/database-normalization/", provider: "Vertabelo", est: "1–2h" }
+
+  courses:
+    "Data Structures":
+      - { title: "Data Structures in Python – Full", type: "video", url: "https://www.youtube.com/watch?v=RBSGKlAvoiM", provider: "freeCodeCamp", est: "8–10h" }
+      - { title: "NeetCode Roadmap", type: "site", url: "https://neetcode.io/roadmap", provider: "NeetCode", est: "multi-week" }
+      - { title: "CSES Problem Set", type: "site", url: "https://cses.fi/problemset/", provider: "CSES", est: "multi-week" }
+    "Algorithms":
+      - { title: "MIT Algorithms (Intro)", type: "playlist", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/", provider: "MIT OCW", est: "multi-week" }
+      - { title: "CP-Algorithms Handbook", type: "site", url: "https://cp-algorithms.com/", provider: "CP-Algorithms", est: "reference" }
+    "Operating Systems":
+      - { title: "OSTEP (Free Book)", type: "book", url: "https://pages.cs.wisc.edu/~remzi/OSTEP/", provider: "OSTEP", est: "multi-week" }
+      - { title: "Processes/Threads/Locks (Playlist)", type: "playlist", url: "https://www.youtube.com/playlist?list=PLu0W_9lII9agq6hOB-YgpFexbxYe4lTqs", provider: "YouTube", est: "6–8h" }
+    "Computer Networks":
+      - { title: "Network Fundamentals", type: "video", url: "https://www.youtube.com/watch?v=qiQR5rTSshw", provider: "freeCodeCamp", est: "3–4h" }
+      - { title: "High Performance Browser Networking", type: "book", url: "https://hpbn.co/", provider: "Ilya Grigorik", est: "multi-day" }
+    "Databases":
+      - { title: "SQL Murder Mystery (Practice)", type: "practice", url: "https://mystery.knightlab.com/", provider: "Knight Lab", est: "1–2h" }
+      - { title: "Intro to Relational Databases", type: "course", url: "https://www.khanacademy.org/computing/computer-programming/sql", provider: "Khan Academy", est: "3–5h" }
+    "Digital Logic":
+      - { title: "Digital Logic Fundamentals", type: "playlist", url: "https://www.youtube.com/playlist?list=PLpQQipWcxwt8l3F7S3w7Dnk3a1JpN96aP", provider: "YouTube", est: "6–8h" }
+      - { title: "Logisim Evolution", type: "site", url: "https://github.com/logisim-evolution/logisim-evolution", provider: "GitHub", est: "tooling" }
+
+signals_rules:
+  prefers_video:
+    boost_types: ["video", "course", "playlist"]
+  time_pressure_high:
+    prefer_est_under_hours: 10
+  likes_hands_on:
+    boost_types: ["practice", "lab", "project"]
+  problem_solving_hint:
+    if:
+      any:
+        - { key: "ai_spotting.level1_clicks", lte: 1 }
+        - { key: "maze.shortest_path_hits", gte: 1 }
+    then: "focus_on_optimization"
+
+signals_reference:
+  problem_solving:
+    ai_spotting:
+      level1_clicks: int
+      level2_clicks: int
+      level3_clicks: int
+    maze:
+      levels_completed: int
+      shortest_path_hits: int
+      total_moves: int
+  cpu_rush:
+    level1_pipeline_order: "ok|fail"
+    level2_memory_bins: "ok|fail"
+    level3_hazard_fixed: "ok|fail"
+    timers:
+      level1_seconds_left: int
+      level2_seconds_left: int
+      level3_seconds_left: int
+  english_likert:
+    listening: 1-5
+    speaking: 1-5
+    writing: 1-5
+    reading: 1-5
+  course_grades:
+    "Data Structures": 0-100
+    "Operating Systems": 0-100
+    "Computer Networks": 0-100
+    "Databases": 0-100
+    "Digital Logic": 0-100
+
+plan_builder:
+  weeks: 4
+  weekly_cap:
+    min: 3
+    max: 6
+  pick_counts:
+    beginner: 3
+    intermediate: 2
+    advanced: 2
+  domain_priority: ["prog","algo","systems","hardware","web","ai","database","problem_solving","english","communication","teamwork"]
+  display_names:
+    prog: "Programming"
+    algo: "Algorithms"
+    systems: "Systems"
+    hardware: "Computer Architecture"
+    web: "Web"
+    ai: "AI"
+    database: "Databases"
+    problem_solving: "Problem Solving"
+    english: "English"
+    communication: "Communication"
+    teamwork: "Teamwork"
+  weekly_habits:
+    - week: 1
+      type: "action"
+      text: "Set up a study slot (45–60min, 5x/week) and track progress."
+    - week: 2
+      type: "action"
+      text: "Do one 60–90min deep-dive session on your weakest domain."
+    - week: 3
+      type: "action"
+      text: "Share a short progress update with a peer or mentor."
+    - week: 4
+      type: "action"
+      text: "Mock review: summarize what you learned and plan next month."
+  soft_skills_routines:
+    english:
+      - week: 1
+        type: "action"
+        text: "Daily: 15–20 minutes listening and a 100-word summary."
+    communication:
+      - week: 2
+        type: "action"
+        text: "Apply the SBI feedback model with a teammate this week."
+    teamwork:
+      - week: 3
+        type: "action"
+        text: "Run a 15-min standup with blockers and next steps."
+  level_resolver:
+    default:
+      beginner: { lt: 60 }
+      intermediate: { gte: 60, lt: 85 }
+      advanced: { gte: 85 }
+  course_rules:
+    threshold: 60
+    pick_per_course: 2
+  ordering_bias:
+    type_boost_from_signals: true
+  output_schema:
+    plan:
+      userId: "uuid"
+      items:
+        - week: "int"
+          type: "resource|action"
+          domain: "string?"
+          course: "string?"
+          title: "string"
+          url: "string?"
+          provider: "string?"
+          resType: "string?"
+          est: "string?"
+
+engine_notes:
+  algorithm:
+    - Compute overall as weighted average.
+    - Map each domain score to level.
+    - Sort domains ascending by score and pick resources per level.
+    - Apply signal boosts and distribute by weeks with caps.
+    - Inject soft-skill routines when below intermediate.
+    - Append course resources for grades below threshold.
+    - Append weekly habits.
+    - Build advice from recommendation rules.

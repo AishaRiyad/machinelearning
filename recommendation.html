@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Your Study Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Chewy&display=swap" rel="stylesheet">
+<style>
+  body{background:#fff7fb;font-family:'Chewy',cursive;margin:0;color:#333}
+  .container{max-width:1000px;margin:24px auto;padding:24px}
+  h1{color:#b3006b;text-align:center;margin:0 0 20px}
+  .card{background:#fff;border:3px dashed #cc2d8f;border-radius:20px;padding:18px;box-shadow:5px 5px 15px rgba(0,0,0,.06);margin-bottom:18px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .item{border:2px solid #f7b1d6;border-radius:14px;padding:10px;margin:8px 0}
+  .domain{font-weight:700;color:#cc2d8f}
+  .btn{background:#cc2d8f;color:#fff;border:none;border-radius:12px;padding:10px 16px;cursor:pointer;font-size:1rem}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .muted{opacity:.7}
+  .pill{display:inline-block;background:#ffeaf3;color:#b3006b;border:2px solid #f7b1d6;border-radius:999px;padding:4px 10px;margin:4px 6px 0 0}
+  .advice-list{margin:0;padding-left:18px}
+  .advice-list li{margin:6px 0}
+  .wk{font-weight:700;color:#b3006b}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📚 Your Plan</h1>
+
+  <div class="card">
+    <h2>Tasks</h2>
+    <div id="meta"></div>
+    <div id="tasks"></div>
+    <div style="margin-top:12px;display:flex;gap:10px">
+      <button class="btn" id="startBtn">Start Plan</button>
+      <button class="btn muted" id="backBtn">← Back to Results</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Videos</h3>
+      <ul id="videos"></ul>
+    </div>
+    <div class="card">
+      <h3>Books & Links</h3>
+      <ul id="links"></ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Advice</h3>
+    <ul id="advice" class="advice-list"></ul>
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'http://127.0.0.1:4000';
+  function getToken(){const raw=localStorage.getItem('token');return raw? (raw.startsWith('Bearer ')?raw:'Bearer '+raw):null}
+  async function api(path, {method='GET', body}={}){
+    const t=getToken(); if(!t){alert('Please login first'); location.href='login.html'; throw new Error('no token')}
+    const r = await fetch(API_BASE+path, {
+      method, headers:{'Authorization':t, ...(body?{'Content-Type':'application/json'}:{})},
+      body: body?JSON.stringify(body):undefined
+    });
+    const txt=await r.text(); let data=null; try{data=txt?JSON.parse(txt):null}catch(_){}
+    if(!r.ok) throw new Error(data?.detail || txt || r.status);
+    return data;
+  }
+
+  function renderTasks(items){
+    const wrap=document.getElementById('tasks'); wrap.innerHTML='';
+    if(!items?.length){ wrap.innerHTML='<p>No tasks yet.</p>'; return; }
+    const grouped = {};
+    items.forEach(it=>{
+      const wk = parseInt(it.week||1,10);
+      (grouped[wk]=grouped[wk]||[]).push(it);
+    });
+    Object.keys(grouped).sort((a,b)=>+a-+b).forEach(wk=>{
+      const box=document.createElement('div');
+      box.innerHTML = `<div class="pill"><span class="wk">Week ${wk}</span></div>`;
+      grouped[wk].forEach(it=>{
+        const div=document.createElement('div'); div.className='item';
+        const domain = it.domain || it.course || 'general';
+        div.innerHTML = `<div class="domain">${domain}</div><div>${it.title}${it.provider?` — <span class="muted">${it.provider}</span>`:''}${it.est?` <span class="pill">${it.est}</span>`:''}${it.url?`<div><a href="${it.url}" target="_blank">${it.url}</a></div>`:''}</div>`;
+        box.appendChild(div);
+      });
+      wrap.appendChild(box);
+    });
+  }
+
+  function renderMeta(plan){
+    const meta=document.getElementById('meta');
+    const created = plan.createdAt ? new Date(plan.createdAt).toLocaleString() : '';
+    const started = plan.startedAt ? new Date(plan.startedAt).toLocaleString() : '—';
+    meta.innerHTML = `<div class="muted">Created: ${created} • Started: ${started}</div>`;
+  }
+
+  function push(el, text){ const li=document.createElement('li'); li.textContent=text; el.appendChild(li); }
+
+  function hydrateResources(items){
+    const v=document.getElementById('videos'); v.innerHTML='';
+    const l=document.getElementById('links');  l.innerHTML='';
+    const byDomain = {};
+    (items||[]).forEach(it=>{ const d=(it.domain||'').toLowerCase(); if(!d) return; (byDomain[d]=byDomain[d]||0); byDomain[d]++; });
+
+    if(byDomain.prog){
+      push(v,'Python OOP crash course');
+      push(l,'Automate the Boring Stuff (free book)');
+    }
+    if(byDomain.algo){
+      push(v,'Graphs & BFS/DFS in 30 minutes');
+      push(l,'LeetCode patterns – arrays/hash/graph');
+    }
+    if(byDomain.systems){
+      push(v,'REST APIs with FastAPI');
+      push(l,'SQL Murder Mystery (practice)');
+    }
+    if(byDomain.hardware){
+      push(v,'CPU pipeline & hazards explained');
+      push(l,'Memory hierarchy quick notes');
+    }
+    if(byDomain.problem_solving){
+      push(v,'Shortest path intuition');
+      push(l,'Daily puzzles site');
+    }
+    if(byDomain.ai){
+      push(v,'Intro to AI image detection concepts');
+      push(l,'Beginner guide to ML evaluation metrics');
+    }
+    if(byDomain.database){
+      push(v,'SQL joins in 20 minutes');
+      push(l,'Use The Index, Luke! (indexing basics)');
+    }
+    if(byDomain.web){
+      push(v,'HTTP crash course');
+      push(l,'MDN: HTTP methods, idempotency');
+    }
+    if(byDomain.english){
+      push(v,'Tech TED Talks – listening practice');
+      push(l,'Google Technical Writing');
+    }
+    if(byDomain.communication){
+      push(v,'Effective standups & demos');
+      push(l,'SBI feedback model');
+    }
+    if(byDomain.teamwork){
+      push(v,'Agile roles & ceremonies');
+      push(l,'Pair-programming guide');
+    }
+  }
+
+  function renderAdvice(adviceArr){
+    const el=document.getElementById('advice'); el.innerHTML='';
+    if(!adviceArr || !adviceArr.length){ el.innerHTML = '<li class="muted">No advice.</li>'; return; }
+    adviceArr.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; el.appendChild(li); });
+  }
+
+  async function loadPlan(){
+    let plan = null;
+
+    const lastPlanRaw = localStorage.getItem('lastPlan');
+    if(lastPlanRaw){ try{ const tmp = JSON.parse(lastPlanRaw); if(tmp?.planId || tmp?.id){ plan = tmp; } }catch(_){} }
+
+    if(plan?.planId){
+      try{
+        const p = await api('/api/plans/'+plan.planId);
+        plan = { id:p.id, planId:p.id, items:p.items, createdAt:p.createdAt, startedAt:p.startedAt, advice:p.advice||[] };
+      }catch(_){ plan = null; }
+    }
+
+    if(!plan){
+      const p = await api('/api/plans/latest');
+      plan = { id:p.id, planId:p.id, items:p.items, createdAt:p.createdAt, startedAt:p.startedAt, advice:p.advice||[] };
+      localStorage.setItem('lastPlan', JSON.stringify(plan));
+    }
+
+    renderMeta(plan);
+    renderTasks(plan.items||[]);
+    hydrateResources(plan.items||[]);
+    renderAdvice(plan.advice||[]);
+
+    document.getElementById('startBtn').onclick = async ()=>{
+      try{
+        await api('/api/plans/'+plan.planId+'/start', {method:'POST'});
+        alert('✅ Plan started!');
+        location.reload();
+      }catch(err){ alert(err.message||err); }
+    };
+  }
+
+  document.getElementById('backBtn').addEventListener('click', ()=>{ location.href='results.html'; });
+  loadPlan().catch(err=>alert(err.message||err));
+</script>
+</body>
+</html>

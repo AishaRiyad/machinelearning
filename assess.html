@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Skill Quest Adventure</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Chewy&display=swap');
+  body{font-family:'Chewy',cursive;background:url('images/cloud.jpg') no-repeat center center fixed;background-size:cover;margin:0;padding:0;color:#333}
+  .container{max-width:1000px;margin:0 auto;padding:2rem;background-color:rgba(255,255,255,.9);border-radius:20px}
+  .stage-header{background:#ffe4ec;border-radius:20px;padding:1rem;margin-top:2rem;text-align:center;font-size:2rem;color:#ff3e83}
+  .section{margin:2rem 0;background:#fff8dc;border:4px dashed #ff69b4;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 15px rgba(0,0,0,.1)}
+  .question{font-size:1.4rem;margin-bottom:1rem}
+  .options button{display:block;width:100%;background-color:#ffb6c1;border:none;padding:12px;margin:.5rem 0;border-radius:12px;cursor:pointer;font-size:1.1rem}
+  .options button:hover{background-color:#ffa1bd}
+  .likert{display:flex;gap:8px;flex-wrap:wrap}
+  .likert button{flex:1;min-width:64px;background:#ffe1ea;border:2px solid #ff69b4;border-radius:12px;padding:10px;cursor:pointer}
+  .likert button:hover{background:#ffd1e1}
+  .badge{display:inline-block;background:#ffeaf3;border:2px solid #ff69b4;border-radius:999px;padding:4px 10px;color:#ff3e83;margin-left:6px}
+  .game-box{text-align:center}
+  canvas{border:3px solid #ff69b4;background-color:#fff;border-radius:12px;margin-top:1rem}
+  .ai-img{width:200px;height:100px;object-fit:cover;margin:5px;border-radius:12px;border:2px solid transparent;cursor:pointer;transition:transform .08s ease,border-color .08s ease}
+  .ai-img:hover{border-color:#ff69b4;transform:translateY(-2px)}
+  .hidden{display:none}
+  .cpu-area{display:grid;gap:12px;justify-items:center}
+  .cpu-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+  .card{background:linear-gradient(135deg,#fff0f6,#ffeef7);border:2px solid #ff69b4;border-radius:14px;padding:10px 14px;min-width:130px;text-align:center;cursor:grab;user-select:none;box-shadow:2px 2px 0 rgba(0,0,0,.08);font-size:1.05rem}
+  .dropzone{width:140px;min-height:54px;border:3px dashed #ff69b4;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#fff;color:#ff3e83;font-weight:700;padding:6px 8px;transition:border-color .1s ease,background .1s ease}
+  .dropzone.filled{background:#fff5fb}
+  .btn{background:#ff69b4;color:#fff;border:none;border-radius:12px;padding:10px 16px;cursor:pointer;font-size:1rem}
+  .btn:hover{background:#ff4c9a}
+  .timer-badge{display:inline-flex;align-items:center;gap:6px;background:#ffeaf3;border:2px solid #ff69b4;color:#ff3e83;padding:6px 10px;border-radius:20px;font-weight:700;font-size:.95rem}
+  .cta{display:flex;justify-content:center;margin:24px 0}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1 style="text-align:center; font-size:2.8rem; color:#ff4c87;">🌟 Skill Quest Adventure 🌟</h1>
+
+  <div class="stage-header">💡 Programming (Output & Code)</div>
+  <div class="section">
+    <div class="question">What is the output of the following Python code?
+<pre>
+def calc():
+    x = 5
+    def inner():
+        return x + 1
+    return inner()
+print(calc())
+</pre>
+    </div>
+    <div class="options" data-qid="prog1" data-domain="prog" data-points="100">
+      <button data-correct="true">6</button>
+      <button>5</button>
+      <button>Error</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="question">Which statement correctly opens a file and reads all lines in Python?</div>
+    <div class="options" data-qid="prog2" data-domain="prog" data-points="100">
+      <button>f = open('x.txt'); lines = f.readlines(); f.close()</button>
+      <button data-correct="true">with open('x.txt') as f: lines = f.readlines()</button>
+      <button>open('x.txt','r').readline()</button>
+    </div>
+  </div>
+
+  <div class="stage-header">🧱 Data Structures</div>
+  <div class="section">
+    <div class="question">Which structure gives O(1) average lookup by key?</div>
+    <div class="options" data-qid="algo1" data-domain="algo" data-points="100">
+      <button>Array</button>
+      <button data-correct="true">Hash Table</button>
+      <button>Binary Heap</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="question">Best structure to implement LRU cache?</div>
+    <div class="options" data-qid="algo2" data-domain="algo" data-points="100">
+      <button data-correct="true">HashMap + Doubly Linked List</button>
+      <button>Stack</button>
+      <button>Queue only</button>
+    </div>
+  </div>
+
+  <div class="stage-header">📐 Algorithms</div>
+  <div class="section">
+    <div class="question">What is the time complexity of binary search?</div>
+    <div class="options" data-qid="algo3" data-domain="algo" data-points="100">
+      <button data-correct="true">O(log n)</button>
+      <button>O(n)</button>
+      <button>O(n^2)</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="question">Which algorithm finds the shortest path in an unweighted grid?</div>
+    <div class="options" data-qid="algo4" data-domain="algo" data-points="100">
+      <button>DFS</button>
+      <button data-correct="true">BFS</button>
+      <button>Dijkstra with negative edges</button>
+    </div>
+  </div>
+
+  <div class="stage-header">🖥️ Systems (OS / DB / AI Basics / Web)</div>
+  <div class="section">
+    <div class="question">In OS scheduling, which policy may cause starvation?</div>
+    <div class="options" data-qid="sys1" data-domain="systems" data-points="100">
+      <button data-correct="true">Shortest-Job-First (non-preemptive)</button>
+      <button>Round Robin</button>
+      <button>First-Come-First-Serve</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="question">Which SQL query returns all students who have a grade ≥ 90?</div>
+    <div class="options" data-qid="db1" data-domain="database" data-points="100">
+      <button>SELECT * FROM students WHERE grade &lt;= 90;</button>
+      <button data-correct="true">SELECT * FROM students WHERE grade &gt;= 90;</button>
+      <button>SELECT students WHERE grade &gt;= 90;</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="question">Which HTTP method is idempotent and typically used to fetch data?</div>
+    <div class="options" data-qid="web1" data-domain="web" data-points="100">
+      <button data-correct="true">GET</button>
+      <button>POST</button>
+      <button>PATCH</button>
+    </div>
+  </div>
+
+  <div class="stage-header" id="ai-header-1">🧠 AI Image Spotting – Level 1</div>
+  <div class="section game-box" id="ai-level-1">
+    <div class="question">Click the AI-generated image</div>
+    <img class="ai-img" src="images/realfrog1.PNG" alt="frog real 1" onclick="aiSpotClick(1,false)">
+    <img class="ai-img" src="images/Aifrog.PNG" alt="frog ai"   onclick="aiSpotClick(1,true)">
+    <img class="ai-img" src="images/realfrog2.PNG" alt="frog real 2" onclick="aiSpotClick(1,false)">
+  </div>
+  <div class="stage-header hidden" id="ai-header-2">🧠 AI Image Spotting – Level 2</div>
+  <div class="section game-box hidden" id="ai-level-2">
+    <div class="question">Click the AI-generated image</div>
+    <img class="ai-img" src="images/realchina1.PNG" alt="china real 1" onclick="aiSpotClick(2,false)">
+    <img class="ai-img" src="images/realchina2.PNG" alt="china real 2" onclick="aiSpotClick(2,false)">
+    <img class="ai-img" src="images/Aichina.PNG" alt="china ai" onclick="aiSpotClick(2,true)">
+    <img class="ai-img" src="images/realchina3.PNG" alt="china real 3" onclick="aiSpotClick(2,false)">
+  </div>
+  <div class="stage-header hidden" id="ai-header-3">🧠 AI Image Spotting – Level 3</div>
+  <div class="section game-box hidden" id="ai-level-3">
+    <div class="question">Click the AI-generated image</div>
+    <img class="ai-img" src="images/realface1.PNG" alt="face real 1" onclick="aiSpotClick(3,false)">
+    <img class="ai-img" src="images/realface2.PNG" alt="face real 2" onclick="aiSpotClick(3,false)">
+    <img class="ai-img" src="images/realface3.PNG" alt="face real 3" onclick="aiSpotClick(3,false)">
+    <img class="ai-img" src="images/Aiface.PNG"    alt="face ai"   onclick="aiSpotClick(3,true)">
+    <img class="ai-img" src="images/realface4.PNG" alt="face real 4" onclick="aiSpotClick(3,false)">
+  </div>
+
+  <div class="stage-header">🎯 Cute Maze (3 Levels)</div>
+  <div class="section game-box">
+    <p>Use arrow keys to reach the ⭐ star! Complete 3 levels and try to follow the shortest path!</p>
+    <canvas id="mazeCanvas" width="300" height="300"></canvas>
+    <div style="margin-top:6px;font-size:.95rem;">Moves: <span id="movesCnt">0</span> • Shortest: <span id="shortLen">?</span></div>
+  </div>
+
+  <div class="stage-header">🗣️ Soft Skills – Communication & Teamwork</div>
+  <div class="section">
+    <div class="question">Your teammate pushes untested code to main and breaks the build. What do you do?</div>
+    <div class="options" data-qid="comm1" data-domain="communication" data-points="100">
+      <button data-correct="true">Open a calm discussion, propose hotfix & set CI checks</button>
+      <button>Publicly blame them in chat</button>
+      <button>Ignore it and hope someone fixes it</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="question">In a group project, two members disagree strongly. Your action?</div>
+    <div class="options" data-qid="team1" data-domain="teamwork" data-points="100">
+      <button>Pick a side and push it through</button>
+      <button data-correct="true">Facilitate a short meeting, clarify goals, agree on criteria</button>
+      <button>Avoid them until deadline</button>
+    </div>
+  </div>
+
+  <div class="stage-header">🇬🇧 English Skills <span class="badge">1 = Poor • 5 = Excellent</span></div>
+  <div class="section">
+    <div class="question">Listening</div>
+    <div class="likert" data-qid="eng1" data-domain="english">
+      <button data-val="1">1</button><button data-val="2">2</button>
+      <button data-val="3">3</button><button data-val="4">4</button><button data-val="5">5</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="question">Speaking</div>
+    <div class="likert" data-qid="eng2" data-domain="english">
+      <button data-val="1">1</button><button data-val="2">2</button>
+      <button data-val="3">3</button><button data-val="4">4</button><button data-val="5">5</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="question">Writing</div>
+    <div class="likert" data-qid="eng3" data-domain="english">
+      <button data-val="1">1</button><button data-val="2">2</button>
+      <button data-val="3">3</button><button data-val="4">4</button><button data-val="5">5</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="question">Reading</div>
+    <div class="likert" data-qid="eng4" data-domain="english">
+      <button data-val="1">1</button><button data-val="2">2</button>
+      <button data-val="3">3</button><button data-val="4">4</button><button data-val="5">5</button>
+    </div>
+  </div>
+
+  <div class="stage-header" id="cpu-header-1">
+    🛠️ CPU Rush – Level 1
+    &nbsp; <span class="timer-badge">⏳ <span id="cpu1-timer">60</span>s</span>
+  </div>
+  <div class="section" id="cpu-level-1">
+    <div class="question">Arrange the CPU pipeline stages in the correct order (drag & drop).</div>
+    <div class="cpu-area">
+      <div class="cpu-row" id="cpu1-pool"></div>
+      <div class="cpu-row" id="cpu1-slots"></div>
+      <button class="btn" onclick="checkCpuLevel1()">Check</button>
+    </div>
+  </div>
+
+  <div class="stage-header hidden" id="cpu-header-2">
+    🛠️ CPU Rush – Level 2
+    &nbsp; <span class="timer-badge">⏳ <span id="cpu2-timer">50</span>s</span>
+  </div>
+  <div class="section hidden" id="cpu-level-2">
+    <div class="cpu-area">
+      <div class="cpu-row" id="cpu2-pool"></div>
+      <div class="cpu-row">
+        <div class="dropzone" data-bin="L1">L1</div>
+        <div class="dropzone" data-bin="L2">L2</div>
+        <div class="dropzone" data-bin="RAM">RAM</div>
+      </div>
+      <button class="btn" onclick="checkCpuLevel2()">Check</button>
+    </div>
+  </div>
+
+  <div class="stage-header hidden" id="cpu-header-3">
+    🛠️ CPU Rush – Level 3
+    &nbsp; <span class="timer-badge">⏳ <span id="cpu3-timer">45</span>s</span>
+  </div>
+  <div class="section hidden" id="cpu-level-3">
+    <div class="question">Resolve the hazard by inserting a bubble (NOP) where needed.</div>
+    <div class="cpu-area">
+      <div class="cpu-row" id="cpu3-pool"></div>
+      <div class="cpu-row" id="cpu3-slots"></div>
+      <button class="btn" onclick="checkCpuLevel3()">Check</button>
+    </div>
+  </div>
+
+  <div class="section cta">
+    <button class="btn" id="finishBtn">Finish Assessment → Results</button>
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'http://127.0.0.1:4000';
+  function getToken(){ const raw = localStorage.getItem('token'); if(!raw){ alert('Please login first'); location.href='login.html'; throw new Error('No token'); } return raw.startsWith('Bearer ') ? raw : ('Bearer ' + raw); }
+  async function api(path, { method='GET', body, timeoutMs=15000 } = {}){
+    const ctrl = new AbortController(); const to = setTimeout(()=>ctrl.abort(), timeoutMs);
+    const res = await fetch(API_BASE+path, { method, headers:{ Authorization:getToken(), ...(body?{'Content-Type':'application/json'}:{}) }, body: body? JSON.stringify(body): undefined, signal: ctrl.signal });
+    clearTimeout(to);
+    const txt = await res.text(); let data=null; try{ data = txt? JSON.parse(txt): null }catch(_){}
+    if(!res.ok) throw new Error(data?.detail || txt || res.status);
+    return data;
+  }
+</script>
+
+<script>
+  const Track = {};
+  const DomainEntries = { prog:[], algo:[], systems:[], hardware:[], problem_solving:[], english:[], communication:[], teamwork:[], database:[], web:[] };
+  const AIEntries = [];
+  function now(){ return performance.now(); }
+  function startQ(qid){ if(!Track[qid]) Track[qid] = { attempts:0, start:now(), solved:false }; if(Track[qid].start==null) Track[qid].start=now(); }
+  function finishQ(qid, correct, domain, points){
+    const t = Track[qid] || {attempts:1,start:now()};
+    const timeSec = Math.max(0, Math.round((now()-t.start)/1000));
+    const base = correct ? (parseInt(points||'100',10)||100) : 0;
+    DomainEntries[domain]?.push({ base_score: base, attempts: t.attempts, time_taken: timeSec });
+    Track[qid] = { attempts: t.attempts, start:null, solved:true };
+  }
+  document.querySelectorAll('.options[data-domain]').forEach(group=>{
+    const domain = group.dataset.domain;
+    const points = parseInt(group.dataset.points||'100',10);
+    const qid = group.dataset.qid || (domain+'_'+Math.random().toString(36).slice(2));
+    group.dataset.qid = qid;
+    const btns = [...group.querySelectorAll('button')];
+    btns.forEach(b=>{
+      b.addEventListener('click', ()=>{
+        if(Track[qid]?.solved) return;
+        if(!Track[qid]) startQ(qid);
+        Track[qid].attempts = (Track[qid].attempts||0) + 1;
+        const isCorrect = b.hasAttribute('data-correct');
+        if(isCorrect){
+          finishQ(qid, true, domain, points);
+          alert('✅ Correct!');
+          btns.forEach(bb=>bb.disabled=true);
+        }else{
+          alert('❌ Try again');
+        }
+      }, { capture:true });
+    });
+  });
+  document.querySelectorAll('.likert[data-domain]').forEach(lk=>{
+    const domain = lk.dataset.domain; const qid = lk.dataset.qid || (domain+'_likert_'+Math.random().toString(36).slice(2));
+    lk.dataset.qid = qid;
+    lk.querySelectorAll('button[data-val]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        if(Track[qid]?.solved) return;
+        if(!Track[qid]) startQ(qid);
+        Track[qid].attempts = (Track[qid].attempts||0) + 1;
+        const v = parseInt(b.dataset.val,10);
+        const score = Math.round((v/5)*100);
+        finishQ(qid, true, domain, score);
+        alert('✅ Saved: '+v+'/5');
+        lk.querySelectorAll('button').forEach(bb=>bb.disabled=true);
+      }, { capture:true });
+    });
+  });
+</script>
+
+<script>
+  const aiClicks = {1:0,2:0,3:0};
+  const aiStart = {1:null,2:null,3:null};
+  function aiSpotClick(level, isAI){
+    if(aiStart[level]==null) aiStart[level]=now();
+    aiClicks[level] += 1;
+    if(isAI){
+      const timeSec = Math.max(0, Math.round((now()-aiStart[level])/1000));
+      AIEntries.push({ kind:'image', level, ai_score:100, attempts:aiClicks[level], time_taken:timeSec });
+      alert('✅ Correct!');
+      if(level===1){document.getElementById('ai-level-1').classList.add('hidden');document.getElementById('ai-header-2').classList.remove('hidden');document.getElementById('ai-level-2').classList.remove('hidden');}
+      else if(level===2){document.getElementById('ai-level-2').classList.add('hidden');document.getElementById('ai-header-3').classList.remove('hidden');document.getElementById('ai-level-3').classList.remove('hidden');}
+      else{alert('🏆 You passed all image levels!')}
+    }else{
+      alert('❌ Real image');
+    }
+  }
+</script>
+
+<script>
+  const canvas=document.getElementById('mazeCanvas');const ctx=canvas.getContext('2d');const size=15;const cell=canvas.width/size;
+  let maze=[], player={x:0,y:0}, level=1, moves=0, shortestLen=0;
+  function randMaze(d){let m;let tries=0;do{m=[];for(let y=0;y<size;y++){const r=[];for(let x=0;x<size;x++){r.push(Math.random()<d?1:0)}m.push(r)}m[0][0]=0;m[size-1][size-1]=0;tries++}while(!bfsLen(m) && tries<20);return m}
+  function bfsLen(mz){const v=Array.from({length:size},()=>Array(size).fill(false));const q=[[0,0,0]];v[0][0]=true;while(q.length){const [x,y,d]=q.shift();if(x===size-1&&y===size-1)return d;[[0,1],[1,0],[0,-1],[-1,0]].forEach(([dx,dy])=>{const nx=x+dx,ny=y+dy;if(nx>=0&&ny>=0&&nx<size&&ny<size&&!v[ny][nx]&&mz[ny][nx]===0){v[ny][nx]=true;q.push([nx,ny,d+1])}})}return 0}
+  function drawMaze(){ctx.clearRect(0,0,canvas.width,canvas.height);for(let y=0;y<size;y++){for(let x=0;x<size;x++){if(maze[y][x]===1){ctx.fillStyle='#ff69b4';ctx.fillRect(x*cell,y*cell,cell,cell)}}}ctx.fillStyle='blue';ctx.fillRect(player.x*cell+5,player.y*cell+5,cell-10,cell-10);ctx.fillStyle='gold';ctx.fillRect((size-1)*cell+8,(size-1)*cell+8,cell-16,cell-16);document.getElementById('movesCnt').textContent=moves;document.getElementById('shortLen').textContent=shortestLen}
+  function setupLevel(){const dens=[0.2,0.3,0.4];maze=randMaze(dens[level-1]);player={x:0,y:0};moves=0;shortestLen=bfsLen(maze);drawMaze()}
+  document.addEventListener('keydown',e=>{
+    let dx=0,dy=0; if(e.key==='ArrowUp')dy=-1;else if(e.key==='ArrowDown')dy=1;else if(e.key==='ArrowLeft')dx=-1;else if(e.key==='ArrowRight')dx=1;
+    const nx=player.x+dx, ny=player.y+dy;
+    if(nx>=0&&nx<size&&ny>=0&&ny<size&&maze[ny][nx]===0){
+      player.x=nx;player.y=ny;moves++;drawMaze();
+      if(player.x===size-1&&player.y===size-1){
+        const shortest = (moves===shortestLen);
+        if(shortest){ AIEntries.push({ kind:'maze', level, ai_score:100, attempts:1, time_taken:moves, shortest_path:true }); }
+        else{ AIEntries.push({ kind:'maze', level, ai_score:0, attempts:1, time_taken:moves, shortest_path:false }); }
+        if(level<3){alert('🎉 Level '+level+' complete!');level++;setupLevel()}else{alert('🏆 Maze complete!')}
+      }
+    }
+  });
+  setupLevel();
+</script>
+
+<script>
+  let dragId=null;
+  function makeDraggable(el){el.setAttribute('draggable','true');el.addEventListener('dragstart',()=>{dragId=el.id;tryStartTimerForCurrentLevel()})}
+  function makeDropzone(zone){zone.addEventListener('dragover',e=>e.preventDefault());zone.addEventListener('drop',e=>{e.preventDefault();tryStartTimerForCurrentLevel();if(!dragId)return;if(zone.firstElementChild){document.getElementById('cpu-pool-dump').appendChild(zone.firstElementChild);zone.classList.remove('filled')}const d=document.getElementById(dragId);zone.appendChild(d);zone.classList.add('filled');dragId=null})}
+  let cpuTimerId=null;
+  const cpuTimerConfig={1:{spanId:'cpu1-timer',seconds:60,started:false,remaining:60,warned:false},2:{spanId:'cpu2-timer',seconds:50,started:false,remaining:50,warned:false},3:{spanId:'cpu3-timer',seconds:45,started:false,remaining:45,warned:false}};
+  let currentCpuLevel=1;
+  function warnBeep(){const ctxA=new (window.AudioContext||window.webkitAudioContext)();function tone(f,d,dt){const o=ctxA.createOscillator();const g=ctxA.createGain();o.type='sine';o.frequency.value=f;o.connect(g);g.connect(ctxA.destination);o.start();g.gain.setValueAtTime(.001,ctxA.currentTime);g.gain.exponentialRampToValueAtTime(.2,ctxA.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,ctxA.currentTime+d);o.stop(ctxA.currentTime+d+dt)}tone(880,.15,.02);setTimeout(()=>tone(660,.15,.02),180)}
+  function startCpuTimer(level,onExpire){
+    clearInterval(cpuTimerId);
+    const cfg=cpuTimerConfig[level];if(!cfg)return;
+    const span=document.getElementById(cfg.spanId);
+    cpuTimerId=setInterval(()=>{
+      cfg.remaining--;span.textContent=cfg.remaining;
+      if(cfg.remaining===5&&!cfg.warned){cfg.warned=true;warnBeep()}
+      if(cfg.remaining<=0){clearInterval(cpuTimerId);cfg.started=false;cfg.remaining=cfg.seconds;span.textContent=cfg.remaining;onExpire&&onExpire()}
+    },1000);
+  }
+  document.addEventListener('visibilitychange',()=>{
+    const cfg=cpuTimerConfig[currentCpuLevel];if(!cfg)return;
+    const span=document.getElementById(cfg.spanId);
+    if(document.hidden){clearInterval(cpuTimerId)}
+    else{if(cfg.started&&cfg.remaining>0){span.textContent=cfg.remaining;startCpuTimer(currentCpuLevel,()=>{if(currentCpuLevel===1){alert('⏰ Time up! Try Level 1 again.');resetCpuLevel1()}else if(currentCpuLevel===2){alert('⏰ Time up! Try Level 2 again.');resetCpuLevel2()}else if(currentCpuLevel===3){alert('⏰ Time up! Try Level 3 again.');resetCpuLevel3()}})}}
+  });
+  function tryStartTimerForCurrentLevel(){
+    const cfg=cpuTimerConfig[currentCpuLevel];if(!cfg||cfg.started)return;
+    const headerVisible=document.getElementById(`cpu-header-${currentCpuLevel}`).offsetParent!==null;
+    const sectionVisible=document.getElementById(`cpu-level-${currentCpuLevel}`).offsetParent!==null;
+    if(!headerVisible||!sectionVisible)return;
+    cfg.started=true;cfg.warned=false;cfg.remaining=cfg.seconds;
+    document.getElementById(cfg.spanId).textContent=cfg.remaining;
+    startCpuTimer(currentCpuLevel,()=>{if(currentCpuLevel===1){alert('⏰ Time up! Try Level 1 again.');resetCpuLevel1()}else if(currentCpuLevel===2){alert('⏰ Time up! Try Level 2 again.');resetCpuLevel2()}else if(currentCpuLevel===3){alert('⏰ Time up! Try Level 3 again.');resetCpuLevel3()}})
+  }
+  function resetCpuLevel1(){const pool=document.getElementById('cpu1-pool');document.querySelectorAll('#cpu1-slots .dropzone').forEach(z=>{if(z.firstElementChild)pool.appendChild(z.firstElementChild);z.classList.remove('filled')}); cpuAttempts[1]++;}
+  function resetCpuLevel2(){const pool=document.getElementById('cpu2-pool');document.querySelectorAll('#cpu-level-2 .dropzone').forEach(z=>{if(z.firstElementChild)pool.appendChild(z.firstElementChild);z.classList.remove('filled')}); cpuAttempts[2]++;}
+  function resetCpuLevel3(){const pool=document.getElementById('cpu3-pool');document.querySelectorAll('#cpu3-slots .dropzone').forEach(z=>{if(z.firstElementChild)pool.appendChild(z.firstElementChild);z.classList.remove('filled')}); cpuAttempts[3]++;}
+  const cpu1Order=["FETCH","DECODE","EXECUTE","MEMORY","WRITEBACK"];
+  const cpuAttempts={1:0,2:0,3:0};
+  (function initCpu1(){
+    const pool=document.getElementById('cpu1-pool');const slots=document.getElementById('cpu1-slots');
+    const dump=document.createElement('div');dump.id='cpu-pool-dump';dump.style.display='none';document.body.appendChild(dump);
+    const names={FETCH:"FETCH",DECODE:"DECODE",EXECUTE:"EXECUTE",MEMORY:"MEMORY",WRITEBACK:"WRITEBACK"};
+    const shuffled=cpu1Order.slice().sort(()=>Math.random()-.5);
+    shuffled.forEach(name=>{const c=document.createElement('div');c.className='card';c.id='cpu1-card-'+name;c.textContent=names[name];makeDraggable(c);pool.appendChild(c)});
+    for(let i=0;i<cpu1Order.length;i++){const dz=document.createElement('div');dz.className='dropzone';dz.dataset.index=i;dz.textContent=`Slot ${i+1}`;makeDropzone(dz);slots.appendChild(dz)}
+  })();
+  function checkCpuLevel1(){
+    const zones=[...document.querySelectorAll('#cpu1-slots .dropzone')];
+    const picked=zones.map(z=>z.firstElementChild?z.firstElementChild.textContent.trim():null);
+    const ok=picked.every((p,i)=>p===cpu1Order[i]);
+    const total=cpuTimerConfig[1].seconds; const left=cpuTimerConfig[1].remaining; const timeUsed = total-left;
+    if(ok){
+      DomainEntries.systems.push({ base_score:100, attempts:cpuAttempts[1], time_taken:timeUsed });
+      clearInterval(cpuTimerId);cpuTimerConfig[1].started=false;cpuTimerConfig[1].remaining=cpuTimerConfig[1].seconds;document.getElementById('cpu1-timer').textContent=cpuTimerConfig[1].remaining;
+      alert('✅ Perfect! Level 2 unlocked');
+      document.getElementById('cpu-level-1').classList.add('hidden');document.getElementById('cpu-header-1').classList.add('hidden');
+      document.getElementById('cpu-header-2').classList.remove('hidden');document.getElementById('cpu-level-2').classList.remove('hidden');document.getElementById('cpu-level-2').scrollIntoView({behavior:'smooth',block:'center'});
+      currentCpuLevel=2
+    } else { alert('❌ Not correct. Try again!'); resetCpuLevel1(); }
+  }
+  const cpu2Items=[{id:'req1',text:'Recent small var',bin:'L1'},{id:'req2',text:'Medium array loop',bin:'L2'},{id:'req3',text:'Large cold file',bin:'RAM'}];
+  (function initCpu2(){
+    const pool=document.getElementById('cpu2-pool');
+    cpu2Items.forEach(it=>{const c=document.createElement('div');c.className='card';c.id='cpu2-card-'+it.id;c.textContent=it.text;c.dataset.bin=it.bin;makeDraggable(c);pool.appendChild(c)});
+    document.querySelectorAll('#cpu-level-2 .dropzone').forEach(makeDropzone);
+  })();
+  function checkCpuLevel2(){
+    const zones=[...document.querySelectorAll('#cpu-level-2 .dropzone')];
+    const ok=zones.every(z=>{const child=z.firstElementChild;return child&&child.dataset.bin===z.dataset.bin});
+    const total=cpuTimerConfig[2].seconds; const left=cpuTimerConfig[2].remaining; const timeUsed = total-left;
+    if(ok){
+      DomainEntries.systems.push({ base_score:100, attempts:cpuAttempts[2], time_taken:timeUsed });
+      clearInterval(cpuTimerId);cpuTimerConfig[2].started=false;cpuTimerConfig[2].remaining=cpuTimerConfig[2].seconds;document.getElementById('cpu2-timer').textContent=cpuTimerConfig[2].remaining;
+      alert('✅ Great! Level 3 unlocked');
+      document.getElementById('cpu-level-2').classList.add('hidden');
+      document.getElementById('cpu-header-2').classList.add('hidden');
+      document.getElementById('cpu-header-3').classList.remove('hidden');
+      document.getElementById('cpu-level-3').classList.remove('hidden');
+      document.getElementById('cpu-level-3').scrollIntoView({behavior:'smooth',block:'center'});
+      currentCpuLevel=3
+    } else { alert('❌ Some requests are in the wrong memory.'); resetCpuLevel2(); }
+  }
+
+  const cpu3Order=["LOAD R1, [X]","NOP (bubble)","ADD R2, R1, #1","STORE [Y], R2"];
+  (function initCpu3(){
+    const pool=document.getElementById('cpu3-pool');const slots=document.getElementById('cpu3-slots');
+    const cards=["LOAD R1, [X]","ADD R2, R1, #1","STORE [Y], R2","NOP (bubble)"].sort(()=>Math.random()-.5);
+    cards.forEach(txt=>{const c=document.createElement('div');c.className='card';c.id='cpu3-card-'+txt.replace(/[^a-z0-9]/gi,'');c.textContent=txt;makeDraggable(c);pool.appendChild(c)});
+    for(let i=0;i<4;i){const dz=document.createElement('div');dz.className='dropzone';dz.dataset.index=i;dz.textContent=`Step ${i+1}`;makeDropzone(dz);slots.appendChild(dz)}
+  })();
+  function checkCpuLevel3(){
+    const zones=[...document.querySelectorAll('#cpu3-slots .dropzone')];
+    const picked=zones.map(z=>z.firstElementChild?z.firstElementChild.textContent.trim():null);
+    const ok=picked.every((p,i)=>p===cpu3Order[i]);
+    const total=cpuTimerConfig[3].seconds; const left=cpuTimerConfig[3].remaining; const timeUsed = total-left;
+    if(ok){
+      DomainEntries.hardware.push({ base_score:100, attempts:cpuAttempts[3], time_taken:timeUsed });
+      clearInterval(cpuTimerId);cpuTimerConfig[3].started=false;cpuTimerConfig[3].remaining=cpuTimerConfig[3].seconds;document.getElementById('cpu3-timer').textContent=cpuTimerConfig[3].remaining;
+      alert('🏆 CPU Rush complete! Great job!');
+    } else { alert('❌ Hazard not resolved. Insert a bubble after LOAD and try again.'); resetCpuLevel3(); }
+  }
+</script>
+
+<script>
+  function agg(list){
+    if(!list||!list.length) return null;
+    let baseSum=0, attSum=0, timeSum=0;
+    list.forEach(x=>{ baseSum+=(+x.base_score||0); attSum+=(+x.attempts||0); timeSum+=(+x.time_taken||0); });
+    const baseAvg = Math.round(baseSum / list.length);
+    return { base_score: baseAvg, attempts: attSum, time_taken: timeSum };
+  }
+  function aggAI(){
+    if(!AIEntries.length) return null;
+    let baseSum=0, attSum=0, timeSum=0;
+    AIEntries.forEach(x=>{
+      if(x.kind==='maze'){
+        const sc = x.shortest_path ? 100 : 0;
+        baseSum += sc;
+      }else{
+        baseSum += (+x.ai_score||0);
+      }
+      attSum += (+x.attempts||0);
+      timeSum += (+x.time_taken||0);
+    });
+    const baseAvg = Math.round(baseSum / AIEntries.length);
+    return { is_ai:true, ai_score: baseAvg, attempts: attSum, time_taken: timeSum };
+  }
+  function buildScoresPayload(){
+    const out = {};
+    const keys = Object.keys(DomainEntries);
+    keys.forEach(k=>{
+      const a = agg(DomainEntries[k]);
+      if(a) out[k] = a;
+    });
+    const ai = aggAI();
+    if(ai) out['ai'] = ai;
+    return out;
+  }
+</script>
+
+<script>
+  const Signals = {
+    problem_solving: { ai_spotting: { level1_clicks: 0, level2_clicks: 0, level3_clicks: 0 }, maze: { levels_completed: 0, shortest_path_hits: 0, total_moves: 0 } },
+    cpu_rush: { level1_pipeline_order: "fail", level2_memory_bins: "fail", level3_hazard_fixed: "fail", timers: { level1_seconds_left: 0, level2_seconds_left: 0, level3_seconds_left: 0 } },
+    english_likert: { listening: 0, speaking: 0, writing: 0, reading: 0 },
+    course_grades: {}
+  };
+  (function hookAiSpotClick(){
+    const _aiSpotClick = window.aiSpotClick;
+    window.aiSpotClick = function(level, isAI){
+      if (level === 1) Signals.problem_solving.ai_spotting.level1_clicks += 1;
+      if (level === 2) Signals.problem_solving.ai_spotting.level2_clicks += 1;
+      if (level === 3) Signals.problem_solving.ai_spotting.level3_clicks += 1;
+      return _aiSpotClick(level, isAI);
+    };
+  })();
+  window.__mazeOnReachGoal = function(){
+    if (moves === shortestLen) { Signals.problem_solving.maze.shortest_path_hits += 1; }
+    Signals.problem_solving.maze.levels_completed += 1;
+    Signals.problem_solving.maze.total_moves += moves;
+  };
+  (function hookEnglishLikert(){
+    document.querySelectorAll('.likert[data-domain="english"]').forEach(lk=>{
+      const q = lk.previousElementSibling?.textContent?.toLowerCase() || '';
+      const field = q.includes('listening') ? 'listening' : q.includes('speaking') ? 'speaking' : q.includes('writing')  ? 'writing' : q.includes('reading')  ? 'reading' : null;
+      if (!field) return;
+      lk.querySelectorAll('button[data-val]').forEach(b=>{
+        b.addEventListener('click', ()=>{ const v = parseInt(b.dataset.val,10); Signals.english_likert[field] = v; }, { capture:true });
+      });
+    });
+  })();
+</script>
+
+<script>
+  async function sendAssessmentAndBuildPlan(payloadScores, fullSignals){
+    const aData = await api('/api/assessments/', { method:'POST', body: { scores: payloadScores, signals: fullSignals } });
+    const eData = await api('/api/evaluate/',    { method:'POST', body: { assessmentId: aData.assessmentId } });
+    const pData = await api('/api/plans/',       { method:'POST', body: { evaluationId: eData.evaluationId } });
+    localStorage.setItem('lastEvaluation', JSON.stringify(eData));
+    localStorage.setItem('lastPlan', JSON.stringify(pData));
+    alert('✅ Assessment saved. Opening results...');
+    location.href = 'results.html';
+  }
+  document.getElementById('finishBtn')?.addEventListener('click', async ()=>{
+    try{
+      const scoresPayload = buildScoresPayload();
+      if (!Object.keys(scoresPayload).length){
+        alert('Please answer some questions first.'); return;
+      }
+      await sendAssessmentAndBuildPlan(scoresPayload, Signals);
+    }catch(err){ alert('❌ ' + (err?.message || err)); }
+  });
+  (function showUserTopBadge(){
+    const raw = localStorage.getItem('token'); if (!raw) return;
+    const name = localStorage.getItem('user_name') || 'User';
+    const badge = document.createElement('div');
+    badge.textContent = '👤 ' + name;
+    badge.style.position = 'fixed';
+    badge.style.top = '12px';
+    badge.style.right = '12px';
+    badge.style.background = 'rgba(255,240,243,0.95)';
+    badge.style.border = '2px solid #ffc2d1';
+    badge.style.borderRadius = '12px';
+    badge.style.padding = '6px 10px';
+    badge.style.zIndex = 9999;
+    document.body.appendChild(badge);
+  })();
+</script>
+</body>
+</html>
